@@ -2,7 +2,9 @@
 
 > 个人主题动漫资讯网站 —— 每一季的动画星光，都收进这座小小的庭院。
 
-**🌐 在线访问：https://xtimte.github.io/hanagarden/**
+**🌐 在线访问：**
+- Cloudflare Pages（推荐，国内访问快）：**https://hanagarden.pages.dev**
+- GitHub Pages（备用）：https://xtimte.github.io/hanagarden/
 
 一个基于 **yuc.wiki（長門番堂）真实数据** 构建的动漫资讯站：新番放送表、新番卫星观测站、剧场版 / OVA / 特别篇、内地院线票房，按季度整理、随时翻阅。
 
