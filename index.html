@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>番之庭 · Hanagarden — 每一季的动画星光</title>
+<meta name="description" content="番之庭（Hanagarden）—— 收集每一季新番放送表、新番观测站、剧场版与内地院线的动画资讯站。数据来源于 yuc.wiki / 長門番堂。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 星空与光晕背景 -->
+<div class="bg-scene" aria-hidden="true">
+  <div class="bg-stars" id="bgStars"></div>
+  <div class="bg-blob blob-a"></div>
+  <div class="bg-blob blob-b"></div>
+  <div class="bg-blob blob-c"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- 樱花花瓣 -->
+<div class="petals" id="petals" aria-hidden="true"></div>
+
+<!-- 鼠标跟随光晕 -->
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- 顶栏 -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" data-scroll>
+      <span class="brand-mark">🌸</span>
+      <span class="brand-name">番之庭</span>
+      <span class="brand-en">Hanagarden</span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#season" data-scroll>本季新番</a>
+      <a href="#upcoming" data-scroll>新番观测</a>
+      <a href="#movies" data-scroll>剧场版·OVA</a>
+      <a href="#theater" data-scroll>内地院线</a>
+      <a href="#archive" data-scroll>历年存档</a>
+      <a href="#about" data-scroll>关于我</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="search-toggle" id="searchToggle" aria-label="搜索">⌕</button>
+      <button class="nav-burger" id="navBurger" aria-label="菜单"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <input id="searchInput" type="text" placeholder="搜索动画标题，如：孤独摇滚 / 葬送的芙莉莲 / 高达……" autocomplete="off">
+    <button id="searchClear" aria-label="清空">✕</button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ======== HERO ======== -->
+  <section class="hero">
+    <div class="hero-inner reveal">
+      <p class="hero-greet" id="greet">こんにちは、欢迎来到番之庭</p>
+      <h1 class="hero-title">
+        <span class="t-grad">每一季的动画星光</span><br>
+        <span class="t-plain">都收进这座小小的庭院</span>
+      </h1>
+      <p class="hero-sub">新番放送表 · 卫星观测站 · 剧场版 · OVA · 内地院线 —— 按季度整理，按心情挑选。<br>数据来自 <b>yuc.wiki · 長門番堂</b>，持续更新中。</p>
+      <p class="hero-rotator">今天想看 <span class="rotator" id="rotator"><i>恋爱日常</i></span> ？</p>
+      <div class="hero-countdown" id="heroCountdown" hidden>
+        <span class="cd-label">📡 距</span><b class="cd-season" id="cdSeason">下个新番季</b><span class="cd-label">还有</span>
+        <b class="cd-time" id="cdTime">--:--:--</b>
+      </div>
+      <div class="hero-stats" id="heroStats">
+        <div class="stat"><b class="num" data-count="0">0</b><span>收录季度</span></div>
+        <div class="stat"><b class="num" data-count="0">0</b><span>收录动画</span></div>
+        <div class="stat"><b class="num" data-count="0">0</b><span>剧场版·OVA</span></div>
+        <div class="stat"><b class="num" data-count="0">0</b><span>内地院线</span></div>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#season" data-scroll>✨ 看看本季新番</a>
+        <a class="btn btn-ghost" href="#upcoming" data-scroll>🔭 新番观测站</a>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true"><span></span></div>
+  </section>
+
+  <!-- ======== 跑马灯 ======== -->
+  <div class="marquee" id="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- ======== 本季新番 ======== -->
+  <section class="section" id="season">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>01</em> · SEASON LINEUP</span>
+      <h2 class="section-title">本季新番 <em>放送表</em></h2>
+      <p class="section-desc">按放送日整理的当季动画，点击卡片查看播放平台与详情</p>
+    </div>
+    <div class="chipbar reveal" id="quarterChips"></div>
+    <div class="chipbar reveal" id="weekdayTabs"></div>
+    <div class="grid-wrap reveal">
+      <div class="card-grid" id="seasonGrid"></div>
+      <div class="empty" id="seasonEmpty" hidden>没有找到符合条件的动画 🥀 换个筛选试试吧</div>
+    </div>
+  </section>
+
+  <!-- ======== 新番观测站 ======== -->
+  <section class="section section-alt" id="upcoming">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>02</em> · SATELLITE OBSERVATORY</span>
+      <h2 class="section-title">新番 <em>卫星观测站</em></h2>
+      <p class="section-desc">那些尚未着陆的新番信号 —— 已经定档与即将定档的动画企划</p>
+    </div>
+    <div class="chipbar reveal" id="upcomingTabs"></div>
+    <div class="grid-wrap reveal">
+      <div class="card-grid grid-wide" id="upcomingGrid"></div>
+    </div>
+  </section>
+
+  <!-- ======== 剧场版·OVA ======== -->
+  <section class="section" id="movies">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>03</em> · MOVIE · OVA · OAD · SP</span>
+      <h2 class="section-title">剧场版 <em>&amp; 特别篇</em></h2>
+      <p class="section-desc">按月份整理的剧场版、OVA、OAD 与 TV 特别篇</p>
+    </div>
+    <div class="chipbar reveal" id="spTabs"></div>
+    <div class="grid-wrap reveal">
+      <div class="card-grid grid-wide" id="spGrid"></div>
+    </div>
+  </section>
+
+  <!-- ======== 内地院线 ======== -->
+  <section class="section section-alt" id="theater">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>04</em> · MAINLAND THEATRICAL</span>
+      <h2 class="section-title">内地院线 <em>日本动画电影</em></h2>
+      <p class="section-desc">引进国内院线的日本动画电影与票房成绩</p>
+    </div>
+    <div class="chipbar reveal" id="theaterTabs"></div>
+    <div class="grid-wrap reveal">
+      <div class="card-grid grid-wide" id="theaterGrid"></div>
+    </div>
+  </section>
+
+  <!-- ======== 历年存档 ======== -->
+  <section class="section" id="archive">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>05</em> · ARCHIVE</span>
+      <h2 class="section-title">历年 <em>存档</em></h2>
+      <p class="section-desc">2020 年以来的每一季新番放送表，随时翻阅</p>
+    </div>
+    <div class="chipbar reveal" id="archiveChips"></div>
+    <div class="grid-wrap reveal">
+      <div class="card-grid" id="archiveGrid"></div>
+      <div class="empty" id="archiveEmpty" hidden>还没有选择季度</div>
+    </div>
+  </section>
+
+  <!-- ======== 搜索全库结果 ======== -->
+  <section class="section section-alt" id="searchResults" hidden>
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>06</em> · SEARCH</span>
+      <h2 class="section-title">搜索结果 <em id="searchResultCount"></em></h2>
+    </div>
+    <div class="grid-wrap">
+      <div class="card-grid grid-wide" id="searchGrid"></div>
+    </div>
+  </section>
+
+  <!-- ======== 关于我 ======== -->
+  <section class="section section-about" id="about">
+    <div class="section-head reveal">
+      <span class="section-kicker"><em>07</em> · ABOUT ME</span>
+      <h2 class="section-title">庭院主人 <em>の小角落</em></h2>
+      <p class="section-desc">这里是个人主题站点 —— 番剧资料为主，自我介绍为辅</p>
+    </div>
+    <div class="about-card reveal">
+      <div class="about-avatar">XT</div>
+      <div class="about-info">
+        <h3 class="about-name">X_Timte <span class="about-badge">B站 UP · 动漫爱好者</span></h3>
+        <p class="about-desc">这座番之庭的看板管理员。收录每一季的动画星光，如果哪部作品让你心动了，欢迎来聊聊～</p>
+      </div>
+      <div class="about-links">
+        <a class="about-link" href="https://space.bilibili.com/277564170" target="_blank" rel="noopener"><span>🅱</span> B站空间</a>
+        <button class="about-link" data-copy="1440100057"><span>💬</span> QQ：1440100057</button>
+        <a class="about-link" href="mailto:1440100057@qq.com"><span>✉️</span> 1440100057@qq.com</a>
+        <button class="about-link" data-copy="xtimte777"><span>🧧</span> 微信：xtimte777</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 页脚 ======== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">🌸 <b>番之庭</b> <span class="brand-en">Hanagarden</span></div>
+      <p class="footer-note">本站为 <b>X_Timte</b> 的个人学习与兴趣作品。所有动画数据（放送表、封面图、平台链接、票房等）均整理自
+        <a href="https://yuc.wiki/" target="_blank" rel="noopener">yuc.wiki · 長門番堂</a>，
+        感谢長門有C 的长期维护。内容遵循
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>，
+        仅供学习交流，请支持正版。
+      </p>
+      <p class="footer-meta">Made with 💙💗 · 数据更新于 <span id="footerDate">-</span> · 封面图共 <span id="footerCovers">0</span> 张已本地化</p>
+    </div>
+  </footer>
+</main>
+
+<!-- 轻提示 -->
+<div class="toast" id="toast" hidden></div>
+
+<!-- 返回顶部 -->
+<button class="back-top" id="backTop" aria-label="返回顶部"><span id="backTopPct">0%</span>↑</button>
+
+<!-- 详情弹窗 -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="动画详情">
+    <button class="modal-close" id="modalClose" aria-label="关闭">✕</button>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

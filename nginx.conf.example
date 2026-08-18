@@ -1,0 +1,73 @@
+# ============================================================
+# 番之庭 · Hanagarden — Nginx 站点配置（含简单反爬虫）
+#
+# 【用法】
+#   1) 在 nginx.conf 的 http { } 块内加入两行限速 zone 定义：
+#        limit_req_zone $binary_remote_addr zone=hanagarden_static:10m rate=10r/s;
+#        limit_req_zone $binary_remote_addr zone=hanagarden_data:10m rate=5r/s;
+#   2) 将本 server 块放入 sites-available/ 并软链到 sites-enabled/
+#      （宝塔面板：站点配置 /www/server/panel/vhost/nginx/你的域名.conf）
+#   3) nginx -t 通过后 reload
+#
+# 【注意】
+#   · 把 hanagarden.example.com 全部替换成你的域名
+#   · 若暂时用 IP 直接访问（无域名），防盗链的 valid_referers 里
+#     需要把 *.example.com example.com 换成你的 IP，例如 ~^https?://123\.45\.67\.89
+#   · 屏蔽 curl/wget 后，服务器上自测会 403，调试时可临时注释对应行
+#   · 若希望被搜索引擎收录，删除"AI/搜索爬虫"那一行即可
+# ============================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name hanagarden.example.com;          # ← 改成你的域名
+
+    root /var/www/hanagarden;                    # ← 站点根目录（宝塔: /www/wwwroot/你的域名）
+    index index.html;
+
+    charset utf-8;
+    server_tokens off;                           # 隐藏 Nginx 版本号
+    autoindex off;                               # 禁止目录列表
+
+    # ---------- 基础安全：屏蔽敏感路径与文件 ----------
+    location ~* (^|/)(\.git|\.env|\.svn|\.hg|\.DS_Store|Thumbs\.db)(/|$) { deny all; }
+    location ~* \.(bak|sql|conf|log|old|swp)$ { deny all; }
+
+    # ---------- 简单反爬虫：UA 黑名单 ----------
+    # 屏蔽空 UA 与常见脚本/批量下载工具；搜索引擎蜘蛛默认放行
+    if ($http_user_agent ~* "(^$)|(python-requests|python-urllib|scrapy|aiohttp|httpx|libwww|wget|curl|okhttp|apache-httpclient|go-http-client|java/|node-fetch|axios)")
+        { return 403; }
+    # AI 内容爬虫与商业 SEO 爬虫（想要收录请删除本行，它会同时放行/拦截搜索蜘蛛）
+    if ($http_user_agent ~* "(GPTBot|ChatGPT-User|CCBot|ClaudeBot|anthropic-ai|Bytespider|PerplexityBot|omgili|PetalBot|DataForSeoBot|AhrefsBot|SemrushBot|MJ12bot|DotBot)")
+        { return 403; }
+
+    # ---------- 防盗链：图片与数据只允许本站引用 ----------
+    # none/blocked = 直接访问或无 Referer 时放行（不误伤正常用户）
+    location ~* \.(jpg|jpeg|png|webp|gif|avif)$ {
+        valid_referers none blocked server_names *.example.com example.com;
+        if ($invalid_referer) { return 403; }
+        expires 7d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+    # 站点数据（js/*.js 与 data/* 含全量 JSON）更严格：防盗链 + 限速
+    location ~* ^/(js|data)/ {
+        valid_referers none blocked server_names *.example.com example.com;
+        if ($invalid_referer) { return 403; }
+        limit_req zone=hanagarden_data burst=10 nodelay;
+        expires 1h;
+    }
+
+    # ---------- 全局限速（防 CC / 防批量抓取） ----------
+    location / {
+        limit_req zone=hanagarden_static burst=30 nodelay;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ---------- 压缩与安全响应头 ----------
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1k;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer" always;
+}

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# 本地日志/临时文件
+data/*.log
+data/test_*.txt
+
+# 系统
+Thumbs.db
+.DS_Store
+
+# 部署产物（不进入源码仓库，需要时重新打包）
+*.zip
