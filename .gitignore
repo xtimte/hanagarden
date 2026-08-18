@@ -12,3 +12,4 @@ Thumbs.db
 
 # 部署产物（不进入源码仓库，需要时重新打包）
 *.zip
+data/push_log.txt
